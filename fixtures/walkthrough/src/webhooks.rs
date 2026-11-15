@@ -225,10 +225,37 @@ pub async fn run(url: &str) -> Outcome {
         .authenticate(&**client, 1, 7, "webhook-proof".into())
         .await?;
     for key in [VIEW, MANAGE] {
-        grants.set_direct(&admin, 1, key, Some(true)).await?;
+        grants
+            .set_direct(
+                &admin,
+                1,
+                key,
+                Some(bilibi_authz::grants::Direct::Allow(
+                    bilibi_authz::Reach::All,
+                )),
+            )
+            .await?;
     }
-    grants.set_direct(&admin, 2, VIEW, Some(true)).await?;
-    grants.set_direct(&admin, 7, MANAGE, Some(true)).await?;
+    grants
+        .set_direct(
+            &admin,
+            2,
+            VIEW,
+            Some(bilibi_authz::grants::Direct::Allow(
+                bilibi_authz::Reach::All,
+            )),
+        )
+        .await?;
+    grants
+        .set_direct(
+            &admin,
+            7,
+            MANAGE,
+            Some(bilibi_authz::grants::Direct::Allow(
+                bilibi_authz::Reach::All,
+            )),
+        )
+        .await?;
     // The operator fixture has a current company port with deliberately unequal
     // company axes. The registered production handler has no such dependency.
     let workforce = Module {

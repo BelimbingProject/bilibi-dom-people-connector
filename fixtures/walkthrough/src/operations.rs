@@ -48,7 +48,16 @@ pub async fn operations_walkthrough() -> Result<()> {
     let grants = services.get::<Grants>("base/authz.grants")?;
     grants.reconcile().await?;
     for key in [VIEW, MANAGE] {
-        grants.set_direct(&admin, 1, key, Some(true)).await?;
+        grants
+            .set_direct(
+                &admin,
+                1,
+                key,
+                Some(bilibi_authz::grants::Direct::Allow(
+                    bilibi_authz::Reach::All,
+                )),
+            )
+            .await?;
     }
     let fixture = Module {
         id: "people/workforce",
@@ -446,7 +455,9 @@ pub async fn operations_walkthrough() -> Result<()> {
             .any(|r| r.kind == "file" && r.id == detached.id),
         "detached file receipt cleans up without People or a connection",
     )?;
-    grants.set_direct(&admin, 1, MANAGE, Some(false)).await?;
+    grants
+        .set_direct(&admin, 1, MANAGE, Some(bilibi_authz::grants::Direct::Deny))
+        .await?;
     require(
         matches!(
             connector.run_doctor(&manager, 1).await,
@@ -461,7 +472,16 @@ pub async fn operations_walkthrough() -> Result<()> {
         ),
         "revoked grant refuses next purge",
     )?;
-    grants.set_direct(&admin, 1, MANAGE, Some(true)).await?;
+    grants
+        .set_direct(
+            &admin,
+            1,
+            MANAGE,
+            Some(bilibi_authz::grants::Direct::Allow(
+                bilibi_authz::Reach::All,
+            )),
+        )
+        .await?;
     println!("KC5 operations walkthrough complete");
     Ok(())
 }

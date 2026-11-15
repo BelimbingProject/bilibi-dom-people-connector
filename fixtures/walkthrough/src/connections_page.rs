@@ -155,12 +155,37 @@ pub async fn connections_page_walkthrough() -> Result<()> {
     let grants = services.get::<Grants>("base/authz.grants")?;
     grants.reconcile().await?;
     for key in [VIEW, MANAGE] {
-        grants.set_direct(&admin, 1, key, Some(true)).await?;
+        grants
+            .set_direct(
+                &admin,
+                1,
+                key,
+                Some(bilibi_authz::grants::Direct::Allow(
+                    bilibi_authz::Reach::All,
+                )),
+            )
+            .await?;
     }
-    grants.set_direct(&admin, 2, VIEW, Some(true)).await?;
+    grants
+        .set_direct(
+            &admin,
+            2,
+            VIEW,
+            Some(bilibi_authz::grants::Direct::Allow(
+                bilibi_authz::Reach::All,
+            )),
+        )
+        .await?;
     // The viewer has no company affiliation in the Platform fixture.
     grants
-        .set_direct(&admin, 2, "admin.company.tenant-wide.manage", Some(true))
+        .set_direct(
+            &admin,
+            2,
+            "admin.company.tenant-wide.manage",
+            Some(bilibi_authz::grants::Direct::Allow(
+                bilibi_authz::Reach::All,
+            )),
+        )
         .await?;
     let manager = auth
         .authenticate(&**client, 1, 1, "connections-proof".into())
@@ -349,7 +374,9 @@ pub async fn connections_page_walkthrough() -> Result<()> {
         "cancel leaves connection intact",
     )?;
     event(page.as_mut(), &manager, json!({"type":"request_remove"})).await?;
-    grants.set_direct(&admin, 1, MANAGE, Some(false)).await?;
+    grants
+        .set_direct(&admin, 1, MANAGE, Some(bilibi_authz::grants::Direct::Deny))
+        .await?;
     let denied = event(page.as_mut(), &manager, json!({"type":"remove"})).await?;
     require(
         denied
@@ -362,7 +389,16 @@ pub async fn connections_page_walkthrough() -> Result<()> {
         connector.status(&manager, 1).await?.state == ConnectionState::Enabled,
         "revoked write makes no mutation",
     )?;
-    grants.set_direct(&admin, 1, MANAGE, Some(true)).await?;
+    grants
+        .set_direct(
+            &admin,
+            1,
+            MANAGE,
+            Some(bilibi_authz::grants::Direct::Allow(
+                bilibi_authz::Reach::All,
+            )),
+        )
+        .await?;
     let viewer_html = pages
         .0
         .render(PageRequest {

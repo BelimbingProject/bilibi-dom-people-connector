@@ -121,7 +121,16 @@ pub async fn backup_walkthrough() -> Result<()> {
     let grants = services.get::<Grants>("base/authz.grants")?;
     grants.reconcile().await?;
     for key in [VIEW, MANAGE] {
-        grants.set_direct(&admin, 1, key, Some(true)).await?;
+        grants
+            .set_direct(
+                &admin,
+                1,
+                key,
+                Some(bilibi_authz::grants::Direct::Allow(
+                    bilibi_authz::Reach::All,
+                )),
+            )
+            .await?;
     }
     std::fs::create_dir_all(&root)?;
     #[cfg(unix)]

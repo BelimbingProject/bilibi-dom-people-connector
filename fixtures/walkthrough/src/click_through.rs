@@ -209,9 +209,20 @@ pub(super) async fn run(url: &str) -> Result<()> {
         ),
     ] {
         let mut page = mount(&services, &manager, operation, "1").await?;
-        grants.set_direct(&admin, 1, MANAGE, Some(false)).await?;
+        grants
+            .set_direct(&admin, 1, MANAGE, Some(bilibi_authz::grants::Direct::Deny))
+            .await?;
         let result = event(page.as_mut(), &manager, payload).await;
-        grants.set_direct(&admin, 1, MANAGE, Some(true)).await?;
+        grants
+            .set_direct(
+                &admin,
+                1,
+                MANAGE,
+                Some(bilibi_authz::grants::Direct::Allow(
+                    bilibi_authz::Reach::All,
+                )),
+            )
+            .await?;
         prove(
             result?.html.contains(refusal),
             &format!("{operation} refuses a revoked manager without a fatal live error"),

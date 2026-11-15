@@ -188,9 +188,27 @@ pub async fn run(url: &str) -> Result<()> {
     // Bilimbi grants the connector keys to no contributed role: an
     // administrator grants them, here directly.
     for key in [VIEW, MANAGE] {
-        grants.set_direct(&admin, MANAGER, key, Some(true)).await?;
+        grants
+            .set_direct(
+                &admin,
+                MANAGER,
+                key,
+                Some(bilibi_authz::grants::Direct::Allow(
+                    bilibi_authz::Reach::All,
+                )),
+            )
+            .await?;
     }
-    grants.set_direct(&admin, VIEWER, VIEW, Some(true)).await?;
+    grants
+        .set_direct(
+            &admin,
+            VIEWER,
+            VIEW,
+            Some(bilibi_authz::grants::Direct::Allow(
+                bilibi_authz::Reach::All,
+            )),
+        )
+        .await?;
     println!("manager@example.test holds {VIEW} and {MANAGE}; viewer@example.test holds {VIEW}");
     let manager = authentication
         .authenticate(&**client, TENANT, MANAGER, "walkthrough".into())
