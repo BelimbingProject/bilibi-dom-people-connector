@@ -196,7 +196,16 @@ pub(super) async fn run(url: &str, live: bool) -> Result<()> {
         .authenticate(&**client, 1, 1, "KA1 fixture".into())
         .await?;
     for key in [VIEW, MANAGE] {
-        grants.set_direct(&admin, 1, key, Some(true)).await?;
+        grants
+            .set_direct(
+                &admin,
+                1,
+                key,
+                Some(bilibi_authz::grants::Direct::Allow(
+                    bilibi_authz::Reach::All,
+                )),
+            )
+            .await?;
     }
     let real_ports = services.get::<Ports>(bilibi_ports::SERVICE)?;
     let mut a = PortAuthorization {

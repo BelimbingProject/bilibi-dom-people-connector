@@ -242,7 +242,16 @@ async fn main() -> Result<()> {
         .authenticate(&**client, 1, 2, "sync-proof".into())
         .await?;
     for key in [VIEW, MANAGE] {
-        grants.set_direct(&admin, 1, key, Some(true)).await?;
+        grants
+            .set_direct(
+                &admin,
+                1,
+                key,
+                Some(bilibi_authz::grants::Direct::Allow(
+                    bilibi_authz::Reach::All,
+                )),
+            )
+            .await?;
     }
     // Explicit deployment includes only connector and port consumers. The fixture
     // workforce module supplies company identity without mounting a People crate.
@@ -775,7 +784,16 @@ async fn main() -> Result<()> {
         "base.settings.global.manage",
         "base.settings.company.manage",
     ] {
-        grants.set_direct(&admin, 1, key, Some(true)).await?;
+        grants
+            .set_direct(
+                &admin,
+                1,
+                key,
+                Some(bilibi_authz::grants::Direct::Allow(
+                    bilibi_authz::Reach::All,
+                )),
+            )
+            .await?;
     }
     println!("KC1 sync proof complete");
     Ok(())
