@@ -267,7 +267,8 @@ impl State {
     }
     async fn event(&mut self, scope: &Scope, payload: &serde_json::Value) -> Result<()> {
         let event = payload["type"].as_str().unwrap_or("");
-        let values = params::string_values(payload);
+        let values = params::string_values_checked(payload, params::FIELD_LIMIT)
+            .map_err(bilibi_database::Error::refused)?;
         match event {
             "clear-flash" => {
                 self.flash = None;
@@ -291,7 +292,10 @@ impl State {
                     &mut self.list
                 };
                 if event.ends_with("filters") {
-                    list.apply_filters(&params::form_values(payload, "filters"));
+                    list.apply_filters(
+                        &params::form_values_checked(payload, "filters", params::FIELD_LIMIT)
+                            .map_err(bilibi_database::Error::refused)?,
+                    );
                 } else {
                     list.put_page(values.get("page").map(String::as_str));
                 }
@@ -454,7 +458,8 @@ impl State {
                 self.outcome(result, "Issue marked resolved.");
             }
             "save_policy" => {
-                let form = params::form_values(payload, "policy");
+                let form = params::form_values_checked(payload, "policy", params::FIELD_LIMIT)
+                    .map_err(bilibi_database::Error::refused)?;
                 let integer = |key| {
                     form.get(key)
                         .and_then(|v| v.trim().parse().ok())
@@ -474,7 +479,8 @@ impl State {
                 self.outcome(result, "Synchronisation policy saved.");
             }
             "save_webhook" => {
-                let form = params::form_values(payload, "webhook");
+                let form = params::form_values_checked(payload, "webhook", params::FIELD_LIMIT)
+                    .map_err(bilibi_database::Error::refused)?;
                 let parsed = (|| {
                     let enabled = form
                         .get("enabled")

@@ -418,7 +418,6 @@ impl Connector {
         tx.commit().await?;
         Ok(policy)
     }
-    #[allow(clippy::too_many_arguments)]
     async fn finish_sync(
         &self,
         scope: &Scope,
@@ -755,7 +754,6 @@ fn issue_key(identity: Option<&Identity>) -> String {
         ),
     }
 }
-#[allow(clippy::too_many_arguments)]
 async fn issue(
     tx: &mut MutationTransaction<'_>,
     c: &Connection,
