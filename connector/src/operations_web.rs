@@ -154,7 +154,8 @@ impl State {
     }
     async fn event(&mut self, scope: &Scope, payload: &Value) -> Result<()> {
         let event = payload["type"].as_str().unwrap_or("");
-        let values = params::string_values(payload);
+        let values = params::string_values_checked(payload, params::FIELD_LIMIT)
+            .map_err(bilibi_database::Error::refused)?;
         match event {
             "clear-flash" => {
                 self.flash = None;
