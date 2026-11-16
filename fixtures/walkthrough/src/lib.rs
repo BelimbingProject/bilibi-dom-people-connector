@@ -25,7 +25,7 @@
 //! Platform fixture refuses a database that already holds other accounts.
 use bilibi_authz::grants::Grants;
 use bilibi_database::{pool, Result};
-use bilibi_module_registry::{verify_composition, Services};
+use bilibi_module_registry::Services;
 use bilibi_people_connector_connector::{
     ConnectionState, Connector, ConnectorError, Status, MANAGE, NATIVE_PROVIDER_ID, SERVICE, VIEW,
 };
@@ -152,11 +152,7 @@ pub async fn run(url: &str) -> Result<()> {
     bilibi_extensions::link();
     let db = pool(url)?;
     let modules = bilibi_module_registry::discover()?;
-    verify_composition(
-        &modules,
-        bilibi_domains::MODULES,
-        bilibi_extensions::MODULES,
-    )?;
+    bilibi_web::verify_composition(&db).await?;
     let migrated = bilibi_database::migrate(&db, &modules).await?;
     println!(
         "mounted Domain modules: {:?}; {} migration(s) applied",

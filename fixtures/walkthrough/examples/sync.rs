@@ -214,11 +214,7 @@ async fn main() -> Result<()> {
     bilibi_extensions::link();
     let db = bilibi_database::pool(&url)?;
     let modules = bilibi_module_registry::discover()?;
-    bilibi_module_registry::verify_composition(
-        &modules,
-        bilibi_domains::MODULES,
-        bilibi_extensions::MODULES,
-    )?;
+    bilibi_web::verify_composition(&db).await?;
     bilibi_database::migrate(&db, &modules).await?;
     bilibi_walkthrough_fixture::install(&db).await?;
     let mut services = Services::default();
