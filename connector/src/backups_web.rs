@@ -201,11 +201,19 @@ impl State {
                     "holds_grid" => &mut self.holds,
                     _ => &mut self.changes,
                 };
-                columns.handle(&params::string_values(payload));
+                columns.handle(
+                    &params::string_values_checked(payload, params::FIELD_LIMIT)
+                        .map_err(bilibi_database::Error::refused)?,
+                );
                 return Ok(());
             }
             "select_company" => {
-                self.select(scope, &params::string_values(payload)).await?;
+                self.select(
+                    scope,
+                    &params::string_values_checked(payload, params::FIELD_LIMIT)
+                        .map_err(bilibi_database::Error::refused)?,
+                )
+                .await?;
                 return Ok(());
             }
             "cancel_restore" => {
@@ -250,7 +258,8 @@ impl State {
                     .map_err(|_| Error::Internal)?;
         }
         drop(client);
-        let values = params::string_values(payload);
+        let values = params::string_values_checked(payload, params::FIELD_LIMIT)
+            .map_err(bilibi_database::Error::refused)?;
         match event {
             "save_policy" => {
                 // Refuse an inline edit queued before the company chooser changed.

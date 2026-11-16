@@ -169,11 +169,15 @@ impl State {
             return Ok(());
         }
         if event == "grid" {
-            self.columns.handle(&params::string_values(payload));
+            self.columns.handle(
+                &params::string_values_checked(payload, params::FIELD_LIMIT)
+                    .map_err(bilibi_database::Error::refused)?,
+            );
             return Ok(());
         }
         if event == "select_company" {
-            let values = params::string_values(payload);
+            let values = params::string_values_checked(payload, params::FIELD_LIMIT)
+                .map_err(bilibi_database::Error::refused)?;
             self.select(scope, &values).await?;
             return Ok(());
         }
@@ -201,7 +205,8 @@ impl State {
         }
         match event {
             "save_policy" => {
-                let values = params::form_values(payload, "policy");
+                let values = params::form_values_checked(payload, "policy", params::FIELD_LIMIT)
+                    .map_err(bilibi_database::Error::refused)?;
                 let integer = |key| {
                     values
                         .get(key)
