@@ -13,6 +13,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let db = bilibi_database::pool(&std::env::var("DATABASE_URL")?)?;
     let app = bilibi_web::App::new(db, &std::env::var("APP_ORIGIN")?)?;
     let listener = tokio::net::TcpListener::bind(std::env::var("BIND_ADDR")?).await?;
-    axum::serve(listener, bilibi_web::router(app)).await?;
+    axum::serve(listener, bilibi_web::staff_router(app)).await?;
     Ok(())
 }
