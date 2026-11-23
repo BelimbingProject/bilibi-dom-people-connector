@@ -14,6 +14,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let origin = std::env::var("APP_ORIGIN")?;
     let app = bilibi_web::App::new(db, &origin)?;
     let listener = tokio::net::TcpListener::bind(std::env::var("BIND_ADDR")?).await?;
-    axum::serve(listener, bilibi_web::router(app)).await?;
+    axum::serve(listener, bilibi_web::staff_router(app)).await?;
     Ok(())
 }
